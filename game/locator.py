@@ -1,5 +1,5 @@
-from math import sin, cos
 from collections import namedtuple
+from math import sin, cos
 from typing import Any
 
 LocatorQuery = namedtuple('LocatorQuery', ['position', 'point0', 'point1'])

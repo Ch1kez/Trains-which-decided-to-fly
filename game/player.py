@@ -1,9 +1,10 @@
-import pymunk
-from game.train import Train
+from collections import namedtuple
 # from trains.arsen_train import Train
 from math import sqrt, radians
+
+import pymunk
 from game.locator import Locator
-from collections import namedtuple
+from game.train import Train
 
 
 class UpdatedTrain(Train):

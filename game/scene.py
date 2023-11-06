@@ -76,21 +76,21 @@ class Scene:
         # circle_shape_2.body = circle_body_2
         # space.add(circle_shape_2, circle_body_2)
         #
-        # box_body_1 = pymunk.Body(body_type=pymunk.Body.STATIC)
-        # box_body_1.position = 1000, 400
-        # box_shape_1 = pymunk.Poly.create_box(box_body_1, (70, 200))
-        # box_shape_1.body = box_body_1
-        # space.add(box_shape_1, box_body_1)
-        #
-        # box_body_2 = pymunk.Body(body_type=pymunk.Body.STATIC)
-        # box_body_2.position = 800, 100
-        # box_shape_2 = pymunk.Poly.create_box(box_body_2, (300, 50))
-        # box_shape_2.body = box_body_2
-        # space.add(box_shape_2, box_body_2)
-
         box_body_1 = pymunk.Body(body_type=pymunk.Body.STATIC)
-        box_body_1.position = 400, 300
-        box_shape_1 = pymunk.Poly.create_box(box_body_1, (200, 300))
+        box_body_1.position = 1000, 400
+        box_shape_1 = pymunk.Poly.create_box(box_body_1, (70, 200))
         box_shape_1.body = box_body_1
-        box_shape_1.body.angle = 45
         space.add(box_shape_1, box_body_1)
+
+        box_body_2 = pymunk.Body(body_type=pymunk.Body.STATIC)
+        box_body_2.position = 800, 100
+        box_shape_2 = pymunk.Poly.create_box(box_body_2, (300, 50))
+        box_shape_2.body = box_body_2
+        space.add(box_shape_2, box_body_2)
+
+        # box_body_1 = pymunk.Body(body_type=pymunk.Body.STATIC)
+        # box_body_1.position = 400, 300
+        # box_shape_1 = pymunk.Poly.create_box(box_body_1, (200, 300))
+        # box_shape_1.body = box_body_1
+        # box_shape_1.body.angle = 45
+        # space.add(box_shape_1, box_body_1)

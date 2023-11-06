@@ -1,13 +1,13 @@
+from math import radians
+
 import pyglet
 import pymunk
 from pyglet import shapes
 from pyglet.window import key
 from pymunk.pyglet_util import DrawOptions
 
-from game.scene import Scene
 from game.player import Player
-
-from math import radians
+from game.scene import Scene
 
 width = 1280
 height = 720

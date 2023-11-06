@@ -44,12 +44,13 @@ class Geometry:
             if line_len < tolerance:
                 return False
         return True
+
     def check_points_on_line(self, buffer):
         """
         Возвращает линию, которая описывает крайние точки прямой.
         Если ни одна точка не лежит на одной прямой, то возвращает False.
         """
-        if len(buffer) != 6:
+        if len(buffer) != 4:
             # Если в буфере нет четырёх точек, возвращаем False
             return False
 
@@ -142,6 +143,102 @@ class Geometry:
 
         # Если линия не коллинеарна ни с одной линией, добавляем ее к списку
         lines.append(local_line)
+        return lines
+
+    def calculate_angle_between_lines(self, line1, line2):
+        """
+        Вычисляет угол между двумя линиями.
+
+        Аргументы:
+        - line1 (list[tuple[float, float]]): Первая линия (список кортежей с координатами крайних точек).
+        - line2 (list[tuple[float, float]]): Вторая линия (список кортежей с координатами крайних точек).
+
+        Возвращает:
+        - Угол между линиями в градусах.
+        """
+        (x1, y1), (x2, y2) = line1, line2
+
+        # Вычисляем угловые коэффициенты для обеих линий
+        line1_param = self.get_line_parameters(x1, y1)
+        line2_param = self.get_line_parameters(x2, y2)
+
+        # Вычисляем угол между линиями с использованием арктангенса
+
+        if 'k' in line1_param.keys() and 'k' in line2_param.keys():
+            angle_rad = math.atan(abs((line2_param['k'] - line1_param['k']) / (1 + line1_param['k'] * line2_param['k'])))
+            return angle_rad < 0.01
+
+        # Если хотя бы одна из линий параллельна координатной оси
+        if 'x' in line1_param.keys() and 'y' in line2_param.keys():
+            return True  # Линии параллельны оси X, их угол равен 0
+
+        if 'y' in line1_param and 'x' in line2_param:
+            return True  # Линии параллельны оси Y, их угол равен 0
+
+
+        # В остальных случаях, когда линии не параллельны и не имеют угловых коэффициентов
+        return False
+
+    def get_dot(self, line1, line2):
+
+        x1, y1 = line1[0]
+        x2, y2 = line1[1]
+        x3, y3 = line2[0]
+        x4, y4 = line2[1]
+
+        # Вычисляем параметры уравнений прямых
+        a1 = y2 - y1
+        b1 = x1 - x2
+        c1 = x2 * y1 - x1 * y2
+        a2 = y4 - y3
+        b2 = x3 - x4
+        c2 = x4 * y3 - x3 * y4
+
+        # Вычисляем определитель матрицы
+        det = a1 * b2 - a2 * b1
+
+        # # Проверяем, являются ли линии параллельными (определитель равен 0)
+        if det == 0:
+            line1_param = self.get_line_parameters(point1=line1[0], point2=line1[1])
+            line2_param = self.get_line_parameters(point1=line2[0], point2=line2[1])
+            if 'x' in line1_param.keys() and 'y' in line2_param.keys():
+                return (line1_param['x'], line2_param['y'])  # Линии параллельны оси X, их угол равен 0
+
+            elif 'y' in line1_param.keys() and 'x' in line2_param.keys():
+                # print(line1_param)
+                return (line1_param['y'], line2_param['x'])  # Линии параллельны оси Y, их угол равен 0
+
+        # Находим координаты точки пересечения
+        x = (c1 * b2 - c2 * b1) / det
+        y = (a1 * c2 - a2 * c1) / det
+
+        return (x, y)
+
+    def merge_lines(self, lines):
+        """
+        Объединяет две линии в одну.
+
+        Аргументы:
+        - line1 (list[tuple[float, float]]): Первая линия (список кортежей с координатами крайних точек).
+        - line2 (list[tuple[float, float]]): Вторая линия (список кортежей с координатами крайних точек).
+
+        Возвращает:
+        - Объединенную линию (список кортежей с координатами крайних точек).
+        """
+
+        for line1 in lines:
+            for line2 in lines[1:]:
+                if self.calculate_angle_between_lines(line1, line2):
+                    dot = self.get_dot(line1=line1, line2=line2)
+                    for i, existing_line in enumerate([line1, line2]):
+                        # Если линии коллинеарны, объединяем их
+                        x1 = min(dot[0], existing_line[0][0])
+                        y1 = min(dot[1], existing_line[0][1])
+                        x2 = max(dot[0], existing_line[1][0])
+                        y2 = max(dot[1], existing_line[1][1])
+                        lines[i] = [(x1, y1), (x2, y2)]
+
+                    # Если линия не коллинеарна ни с одной линией, добавляем ее к списку
         return lines
 
 
@@ -246,6 +343,7 @@ class Train:
             local_line = self.geometry.check_points_on_line(buffer=self.point_buffer_list)
             if local_line:
                 self.lines = self.geometry.combine_collinear_lines(local_line=local_line, lines=self.lines)
+                self.lines = self.geometry.merge_lines(lines=self.lines)
         else:
             self.point_buffer_list.sort()
             local_line = self.geometry.check_points_on_line(buffer=self.point_buffer_list)
@@ -284,7 +382,7 @@ class Train:
                 if self.geometry.get_line_len(point_1=new_point, points_list=self.point_buffer_list):
                     self.points.append(new_point)
                     self.point_buffer_list.append(new_point)
-                    if len(self.point_buffer_list) == 6:
+                    if len(self.point_buffer_list) == 4:
                         self.determine_figure()
                         self.point_buffer_list.pop(0)
             else:
@@ -315,7 +413,7 @@ class Train:
         figures = {
             "lines": self.lines,  # не замкнутая
             "circles": [circle1, circle2, circle3],
-            "points": self.points
+            "points": []
         }
 
         return {
